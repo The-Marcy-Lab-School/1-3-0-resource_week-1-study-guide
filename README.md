@@ -215,7 +215,6 @@ PI = 3.14159;   // TypeError: cannot reassign const variables
 ```
 
 - Variables must be referenced AFTER they are declared. Otherwise, a `ReferenceError` will be thrown.
-- Variables declared with `var` can be referenced BEFORE they are declared but will have the value `undefined`. This is due to **hoisting** and should be avoided.
 
 **Q: You are writing a program that involves a variable called `clickCount` that will keep track of how many times a user clicks on a button. Should `clickCount` be declared with `let` or `const`?**
 
@@ -323,13 +322,14 @@ function greet(name) {
 * Functions created using this syntax are **hoisted** (like variables declared with `var`) and are thus invocable _before_ their declaration appears in the file.
 * For consistency, this should be avoided
 
-### Scope
+### Variable Scope & Hoisting
 
-* Variables declared within the a code block with `let` and `const` are only "visible" within that code block, including nested code blocks.
-* The following JavaScript constructs use code blocks that create their own **scope**:
-  * Functions
-  * If Statements
-  * Loops
+`let` - reassignable, hoisted, block scoped
+`const` - not reassignable, not hoisted, block scoped
+`var` - reassignable, hoisted, function scoped
+
+* **Scope** refers to *where* a variable can be referenced
+* `let` and `const` variables are **block scoped** — they are reference-able only within the code block where the variable is declared (loops, `if`/`else` statements, functions)
 
 ```js
 let a = "A globally scoped variable"
@@ -343,22 +343,20 @@ const myScopedFunction = () => {
 }
 console.log(a); // and we can only reference a here
 ```
-* Variables declared with `var` are only scoped to functions, not `if` statements or loops. Another reason to avoid using `var`.
-
-```js
-if (true) {
-  var a = 'hi';
-}
-console.log(a); // this works
-```
-
-* Variables declared without any keyword are globally scoped, regardless of where they are declared. This should always be avoided.
+* `var` variables are **function scoped** — they are reference-able anywhere within the function where the variable is declared (including nested blocks)
+* `var` variables are **"hoisted to the top of the function scope"** - you can reference the variable "before" it is declared (but it will hold `undefined` until it is assigned)
 
 ```js
 const foo = () => {
-  x = 5; // a global scoped variable. Don't do this.
+  console.log(a); // undefined, no error
+  if (true) {
+    var a = 'hi';
+  } 
+  console.log(a); // hi
 }
 ```
+
+* Variables declared without any keyword are globally scoped, regardless of where they are declared. They are not hoisted. This should always be avoided.
 
 **Q: Why is scope important?**
 
@@ -367,7 +365,34 @@ const foo = () => {
 1. Scope helps reduce memory usage by effectively "throwing away" a variable once we leave the scope of that variable. 
 2. Scope can also reduce variable name conflicts. We will often use common variable names for repeated tasks, for example: declaring the variable `i` for a `for` loop. Without scope, every `for` loop would need to use a different variable name to avoid conflicts.
 
+</details><br>
+
+**Q: Consider the code below. Where are `x`, `a`, `b`, and `c` available?**
+
+```js
+const myFunc = () => {
+  console.log(a, b, c, x); // 1
+  if (true) {
+    const a = '5';
+    let b = 10;
+    var c = true;
+    x = 'hi'
+    console.log(a, b, c, x); // 2
+  }
+  console.log(a, b, c, x); // 3
+}
+myFunc();
+console.log(a, b, c, x); // 4
+```
+
+<details><summary>Answer</summary>
+
+- `a` and `b` are only available at position 2 (within the `if` statement) because they are block-scoped.
+- `c` is function scoped and hoisted so it is available at position 1 (with the value `undefined`) and positions 2 and 3 with the value `true`. 
+- `x` is a globally scoped variable and is available at positions 2, 3, and 4 (it is not hoisted to position 1)
+
 </details>
+
 
 ### String Properties and Methods
 
